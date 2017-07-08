@@ -18,7 +18,23 @@ def self_info():
         else:
             print(colored('User does not exist!','red'))
     else:
-        print(colored('Status code other than 200 received!','blue'))
+        print(colored('Status code other than 200 received!','red'))
+
+def get_user_id(insta_username):
+    request_url = Base_Url + 'users/search?q=' + insta_username + '&access_token=' + App_access_token
+    print('GET request url : ',request_url)
+    user_info = requests.get(request_url).json()
+
+    if user_info['meta']['code'] == 200:
+        if len(user_info['data']):
+            return user_info['data'][0]['id']
+        else:
+            return colored("This user doesn't exist in your sandbox list",'red')
+    else:
+        print(colored('Status code other than 200 received!', 'blue'))
+        exit()
 
 
 self_info()
+username = input("Enter username ")
+print(get_user_id(username))
