@@ -20,6 +20,31 @@ def self_info():
             print('No. of people you are following : ',colored(user_info['data']['counts']['follows'],'blue'))
             print('No. of posts : ',colored(user_info['data']['counts']['media'],'blue'))
             print("")
+            while (1):
+                cprint("Enter choice :", 'yellow')
+                print("1.Get followers list")
+                print("2.Get following list")
+                print("3.Get recent post")
+                print("4.Recent media liked by me")
+                print("5.Back to main menu")
+                try:
+                    choice = int(input(colored("Your choice : ", 'green')))
+                except ValueError:
+                    print(colored("Choose a valid option", 'red'))
+                    get_user_info('mohit_s_jindal')
+                if choice == 1:
+                    list_of_users_this_user_is_followed_by('mohit_s_jindal')
+                elif choice == 2:
+                    list_of_users_this_user_follows('mohit_s_jindal')
+                elif choice == 3:
+                    get_own_post()
+                elif choice == 4:
+                    recent_media_liked_by_user()
+                elif choice == 5:
+                    menu()
+                else:
+                    print(colored("invalid option", 'red'))
+                    menu()
         else:
             print(colored('User does not exist!','red'))
     else:
@@ -61,7 +86,8 @@ def get_user_info(insta_username):
                 print("1.Get followers list")
                 print("2.Get following list")
                 print("3.Get recent post")
-                print("4.Back to main menu")
+                #print("4.Recent media liked by user")
+                print("5.Back to main menu")
                 try:
                     choice = int(input(colored("Your choice : ", 'green')))
                 except ValueError:
@@ -73,7 +99,9 @@ def get_user_info(insta_username):
                     list_of_users_this_user_follows(insta_username)
                 elif choice == 3:
                     get_user_post(insta_username)
-                elif choice == 4:
+                #elif choice == 4:
+                    #recent_media_liked_by_user(insta_username)
+                elif choice == 5:
                     menu()
                 else:
                     print(colored("invalid option", 'red'))
@@ -178,6 +206,31 @@ def peoples_like_recent_post(insta_username):
             cprint("No one like this post",'blue')
     else:
         print(colored('Status code other than 200 received!\n', 'red'))
+
+
+def recent_media_liked_by_user():
+    #user_id = get_user_id(insta_username)
+    #if user_id == None:
+     #   cprint("This user doesn't exist in your sandbox list", 'red')
+      #  menu()
+    request_url = Base_Url + 'users/self/media/liked?access_token=' + App_access_token
+    print('GET request url :', request_url)
+    media = requests.get(request_url).json()
+    if media['meta']['code'] == 200:
+        if len(media['data']):
+            image_name = media['data'][0]['id'] + '.jpeg'
+            image_url = media['data'][0]['images']['standard_resolution']['url']
+            request.urlretrieve(image_url, image_name)
+            cprint("User's image has been downloaded!", 'green')
+            print("Post owner is",colored(media['data'][0]['user']['username'],'blue'))
+            print("")
+        else:
+            cprint("You doesn't have any post\n",'blue')
+    else:
+        print(colored('Status code other than 200 received!\n', 'red'))
+
+
+
 
 
 def peoples_comment_recent_post(insta_username):
