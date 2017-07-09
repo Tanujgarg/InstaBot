@@ -1,5 +1,8 @@
+from admin_details import username,password
 import requests
-from termcolor import colored
+from termcolor import colored,cprint
+from urllib import request
+
 App_access_token = '5508711577.1063dec.210e3b7e96f14227b50f96e961f098d6'
 Base_Url = 'https://api.instagram.com/v1/'
 
@@ -12,9 +15,11 @@ def self_info():
     if user_info['meta']['code'] == 200:
         if len(user_info['data']):
             print('Username : ',colored(user_info['data']['username'],'blue'))
+            print("Name : ",colored(user_info['data']['full_name'],'blue'))
             print('No. of followers : ',colored(user_info['data']['counts']['followed_by'],'blue'))
             print('No. of people you are following : ',colored(user_info['data']['counts']['follows'],'blue'))
             print('No. of posts : ',colored(user_info['data']['counts']['media'],'blue'))
+            print("")
         else:
             print(colored('User does not exist!','red'))
     else:
@@ -29,12 +34,248 @@ def get_user_id(insta_username):
         if len(user_info['data']):
             return user_info['data'][0]['id']
         else:
-            return colored("This user doesn't exist in your sandbox list",'red')
+            return None
     else:
-        print(colored('Status code other than 200 received!', 'blue'))
-        exit()
+        print(colored('Status code other than 200 received!', 'red'))
+        menu()
+
+def get_user_info(insta_username):
+    user_id = get_user_id(insta_username)
+    if user_id == None:
+        cprint("This user doesn't exist in your sandbox list",'red')
+        menu()
+    request_url = Base_Url + 'users/' + user_id + '?access_token=' + App_access_token
+    print('GET request url :',request_url)
+    user_info = requests.get(request_url).json()
+
+    if user_info['meta']['code'] == 200:
+        if len(user_info['data']):
+            print('Username : ', colored(user_info['data']['username'], 'blue'))
+            print("Name : ", colored(user_info['data']['full_name'], 'blue'))
+            print('No. of followers : ', colored(user_info['data']['counts']['followed_by'], 'blue'))
+            print('No. of people user following : ', colored(user_info['data']['counts']['follows'], 'blue'))
+            print('No. of posts : ', colored(user_info['data']['counts']['media'], 'blue'))
+            print("")
+            while(1):
+                cprint("Enter choice :", 'yellow')
+                print("1.Get followers list")
+                print("2.Get following list")
+                print("3.Get recent post")
+                print("4.Back to main menu")
+                try:
+                    choice = int(input(colored("Your choice : ", 'green')))
+                except ValueError:
+                    print(colored("Choose a valid option", 'red'))
+                    get_user_info(insta_username)
+                if choice == 1:
+                    list_of_users_this_user_is_followed_by(insta_username)
+                elif choice == 2:
+                    list_of_users_this_user_follows(insta_username)
+                elif choice == 3:
+                    get_user_post(insta_username)
+                elif choice == 4:
+                    menu()
+                else:
+                    print(colored("invalid option", 'red'))
+                    menu()
+
+        else:
+            cprint('There is no data for this user!','green')
+    else:
+        print(colored('Status code other than 200 received!', 'red'))
+
+def get_own_post():
+    request_url = Base_Url + 'users/self/media/recent/?access_token=' + App_access_token
+    print('GET request url :',request_url)
+    own_media = requests.get(request_url).json()
+
+    if own_media['meta']['code'] == 200:
+        if len(own_media['data']):
+            image_name = own_media['data'][0]['id'] + '.jpeg'
+            image_url = own_media['data'][0]['images']['standard_resolution']['url']
+            request.urlretrieve(image_url, image_name)
+            cprint('Your image has been downloaded!','green')
+        else:
+            cprint("You doesn't have any post\n",'blue')
+    else:
+        print(colored('Status code other than 200 received!\n', 'red'))
 
 
-self_info()
-username = input("Enter username ")
-print(get_user_id(username))
+def get_user_post(insta_username):
+    user_id = get_user_id(insta_username)
+    if user_id == None:
+        cprint("This user doesn't exist in your sandbox list", 'red')
+        menu()
+    request_url = Base_Url + 'users/' + user_id + '/media/recent/?access_token=' + App_access_token
+    print('GET request url :',request_url)
+    user_media = requests.get(request_url).json()
+
+    if user_media['meta']['code'] == 200:
+        if len(user_media['data']):
+            image_name = user_media['data'][0]['id'] + '.jpeg'
+            image_url = user_media['data'][0]['images']['standard_resolution']['url']
+            request.urlretrieve(image_url,image_name)
+            cprint("User's image has been downloaded!", 'green')
+            print("")
+            while(1):
+                cprint("Enter your choice",'yellow')
+                print("1.list of peoples likes this post")
+                print("2.list of peoples comment on this post")
+                print("3.Main menu")
+                try:
+                    choice = int(input(colored("Your choice : ", 'green')))
+                except ValueError:
+                    print(colored("Choose a valid option", 'red'))
+                    get_user_post(insta_username)
+                if choice == 1:
+                    peoples_like_recent_post(insta_username)
+                elif choice == 2:
+                    peoples_comment_recent_post(insta_username)
+                elif choice == 3:
+                    menu()
+                else:
+                    cprint("invalid choice")
+                    menu()
+
+
+        else:
+            cprint("User doesn't have any post\n", 'blue')
+    else:
+        print(colored('Status code other than 200 received!\n', 'red'))
+
+
+def get_post_id(insta_username):
+    user_id = get_user_id(insta_username)
+    if user_id == None:
+        cprint("This user doesn't exist in your sandbox list", 'red')
+        menu()
+    request_url = Base_Url + 'users/' + user_id + '/media/recent/?access_token=' + App_access_token
+    print('GET request url :', request_url)
+    user_media = requests.get(request_url).json()
+
+    if user_media['meta']['code'] == 200:
+        if len(user_media['data']):
+            return user_media['data'][0]['id']
+        else:
+            cprint("User doesn't have any post\n", 'blue')
+    else:
+        print(colored('Status code other than 200 received!\n', 'red'))
+
+def peoples_like_recent_post(insta_username):
+    post_id = get_post_id(insta_username)
+    request_url = Base_Url + 'media/' + post_id + '/likes?access_token=' + App_access_token
+    print('GET request url :', request_url)
+    peoples = requests.get(request_url).json()
+
+    if peoples['meta']['code'] == 200:
+        if len(peoples['data']):
+            position = 1
+            cprint("Peoples like recent post",'cyan')
+            for users in peoples['data']:
+                print(position,colored(users['username'],'blue'))
+                position += 1
+        else:
+            cprint("No one like this post",'blue')
+    else:
+        print(colored('Status code other than 200 received!\n', 'red'))
+
+
+def peoples_comment_recent_post(insta_username):
+    post_id = get_post_id(insta_username)
+    request_url = Base_Url + 'media/' + post_id + '/comments?access_token=' + App_access_token
+    print('GET request url :', request_url)
+    peoples = requests.get(request_url).json()
+
+    if peoples['meta']['code'] == 200:
+        if len(peoples['data']):
+            position = 1
+            cprint("Peoples comment recent post",'cyan')
+            for users in peoples['data']:
+                print(position,colored(users['username'],'blue'))
+                position += 1
+        else:
+            cprint("No one comment this post",'blue')
+    else:
+        print(colored('Status code other than 200 received!\n', 'red'))
+
+def list_of_users_this_user_follows(insta_username):
+    user_id = get_user_id(insta_username)
+    if user_id == None:
+        cprint("This user doesn't exist in your sandbox list", 'red')
+        menu()
+    request_url = Base_Url + 'users/' + user_id + '/follows?access_token=' + App_access_token
+    print('GET request url :', request_url)
+    peoples = requests.get(request_url).json()
+    if peoples['meta']['code'] == 200:
+        if len(peoples['data']):
+            position = 1
+            cprint("Peoples this user follows",'cyan')
+            for users in peoples['data']:
+                print(position,colored(users['username'],'blue'))
+                position += 1
+        else:
+            cprint("No one this user follows",'blue')
+    else:
+        print(colored('Status code other than 200 received!\n', 'red'))
+
+def list_of_users_this_user_is_followed_by(insta_username):
+    user_id = get_user_id(insta_username)
+    if user_id == None:
+        cprint("This user doesn't exist in your sandbox list", 'red')
+        menu()
+    request_url = Base_Url + 'users/' + user_id + '/followed-by?access_token=' + App_access_token
+    print('GET request url :', request_url)
+    peoples = requests.get(request_url).json()
+    if peoples['meta']['code'] == 200:
+        if len(peoples['data']):
+            position = 1
+            cprint("This user is followed by", 'cyan')
+            for users in peoples['data']:
+                print(position, colored(users['username'], 'blue'))
+                position += 1
+        else:
+            cprint("No one follow this user", 'blue')
+    else:
+        print(colored('Status code other than 200 received!\n', 'red'))
+
+
+
+
+def Start_instaBot():
+    user = input("Enter Username : ")
+    pswrd = input("Enter Password : ")
+    if user.upper() == username and pswrd == password:
+        print(colored("Login Successful",'cyan'))
+        print(colored("-----Wellcome to InstaBot-----\n",'blue'))
+        menu()
+    else:
+        print(colored("Verification failed !\nPlease provide right Details\n",'red'))
+        Start_instaBot()
+
+def menu():
+    while(1):
+        cprint("Enter your choice\n", 'yellow')
+        print("1.Get your own details")
+        print("2.Get details of a user")
+        #print("3.Get your own recent post")
+        #print("4.Get recent post of a user")
+        try:
+            choice = int(input(colored("Your choice : ",'green')))
+        except ValueError:
+            print(colored("Choose a valid option",'red'))
+            menu()
+        if choice == 1:
+            self_info()
+        elif choice == 2:
+            insta_username = input("Enter username : ")
+            get_user_info(insta_username)
+        #elif choice == 3:
+         #   get_own_post()
+        #elif choice == 4:
+         #   insta_username = input("Enter username : ")
+            #get_user_post(insta_username)
+          #  list_of_users_this_user_is_followed_by(insta_username)
+
+
+if __name__ == '__main__':
+    Start_instaBot()
