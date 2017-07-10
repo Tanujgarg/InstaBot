@@ -86,8 +86,7 @@ def get_user_info(insta_username):
                 print("1.Get followers list")
                 print("2.Get following list")
                 print("3.Get recent post")
-                #print("4.Recent media liked by user")
-                print("5.Back to main menu")
+                print("4.Back to main menu")
                 try:
                     choice = int(input(colored("Your choice : ", 'green')))
                 except ValueError:
@@ -99,9 +98,7 @@ def get_user_info(insta_username):
                     list_of_users_this_user_follows(insta_username)
                 elif choice == 3:
                     get_user_post(insta_username)
-                #elif choice == 4:
-                    #recent_media_liked_by_user(insta_username)
-                elif choice == 5:
+                elif choice == 4:
                     menu()
                 else:
                     print(colored("invalid option", 'red'))
@@ -149,7 +146,9 @@ def get_user_post(insta_username):
                 cprint("Enter your choice",'yellow')
                 print("1.list of peoples likes this post")
                 print("2.list of peoples comment on this post")
-                print("3.Main menu")
+                print("3.Like this post")
+                print("4.Comment on this post")
+                print("5.Main menu")
                 try:
                     choice = int(input(colored("Your choice : ", 'green')))
                 except ValueError:
@@ -160,12 +159,14 @@ def get_user_post(insta_username):
                 elif choice == 2:
                     peoples_comment_recent_post(insta_username)
                 elif choice == 3:
+                    like_a_post(insta_username)
+                elif choice == 4:
+                    post_a_comment(insta_username)
+                elif choice == 5:
                     menu()
                 else:
                     cprint("invalid choice")
                     menu()
-
-
         else:
             cprint("User doesn't have any post\n", 'blue')
     else:
@@ -209,10 +210,6 @@ def peoples_like_recent_post(insta_username):
 
 
 def recent_media_liked_by_user():
-    #user_id = get_user_id(insta_username)
-    #if user_id == None:
-     #   cprint("This user doesn't exist in your sandbox list", 'red')
-      #  menu()
     request_url = Base_Url + 'users/self/media/liked?access_token=' + App_access_token
     print('GET request url :', request_url)
     media = requests.get(request_url).json()
@@ -293,6 +290,60 @@ def list_of_users_this_user_is_followed_by(insta_username):
 
 
 
+def like_a_post(insta_username):
+    media_id = get_post_id(insta_username)
+    request_url = Base_Url + 'media/' + media_id + '/likes'
+    payload = {"access_token": App_access_token}
+    print('POST request url :',request_url)
+    like = requests.post(request_url, payload).json()
+    if like['meta']['code'] == 200:
+        cprint('Like successful!','green')
+    else:
+        cprint('Your like was unsuccessful. Try again!','red')
+
+def post_a_comment(insta_username):
+    media_id = get_post_id(insta_username)
+    text = raw_input(colored("Your comment: ",'cyan'))
+    payload = {"access_token": App_access_token, "text" : text}
+    request_url = Base_Url + 'media/' + media_id + '/comments'
+    print('POST request url :',request_url)
+
+    comment = requests.post(request_url, payload).json()
+
+    if comment['meta']['code'] == 200:
+        cprint("Successfully added a new comment!",'green')
+    else:
+        cprint("Unable to add comment. Try again!",'red')
+
+
+def get_post_by_caption(insta_username):
+    caption = input("Enter caption : ")
+    user_id = get_user_id(insta_username)
+    if user_id == None:
+        cprint("This user doesn't exist in your sandbox list", 'red')
+        menu()
+    request_url = Base_Url + 'users/' + user_id + '/media/recent/?access_token=' + App_access_token
+    print('GET request url :', request_url)
+    user_media = requests.get(request_url).json()
+    item = 1
+    if user_media['meta']['code'] == 200:
+        if len(user_media['data']):
+            for post in user_media['data']:
+                if post['caption'] == caption:
+                    image_name = str(item)+'.jpeg'
+                    image_url = post['images']['standard_resolution']['url']
+                    request.urlretrieve(image_url, image_name)
+                    print(item,'post founded and saved')
+                    item += 1
+                else:
+                    cprint("No post with this caption",'red')
+        else:
+            cprint("User doesn't have any post\n", 'blue')
+    else:
+        print(colored('Status code other than 200 received!\n', 'red'))
+
+
+
 
 def Start_instaBot():
     user = input("Enter Username : ")
@@ -310,8 +361,10 @@ def menu():
         cprint("Enter your choice\n", 'yellow')
         print("1.Get your own details")
         print("2.Get details of a user")
-        #print("3.Get your own recent post")
-        #print("4.Get recent post of a user")
+        print("3.Like a post(recently added)")
+        print("4.Comment on a post(recently added)")
+        print("5.Get post by perticular caption")
+        print("6.Exit")
         try:
             choice = int(input(colored("Your choice : ",'green')))
         except ValueError:
@@ -322,13 +375,19 @@ def menu():
         elif choice == 2:
             insta_username = input("Enter username : ")
             get_user_info(insta_username)
-        #elif choice == 3:
-         #   get_own_post()
-        #elif choice == 4:
-         #   insta_username = input("Enter username : ")
-            #get_user_post(insta_username)
-          #  list_of_users_this_user_is_followed_by(insta_username)
-
+        elif choice == 3:
+            insta_username = input("Enter username : ")
+            like_a_post(insta_username)
+        elif choice == 4:
+            insta_username = input("Enter username : ")
+            post_a_comment(insta_username)
+        elif choice == 5:
+            insta_username = input("Enter username : ")
+            get_post_by_caption(insta_username)
+        elif choice == 6:
+            exit()
+        else:
+            cprint("Invalid option",'red')
 
 if __name__ == '__main__':
     Start_instaBot()
