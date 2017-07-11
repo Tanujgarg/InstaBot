@@ -10,7 +10,11 @@ Base_Url = 'https://api.instagram.com/v1/'
 def self_info():
     request_url = Base_Url + "users/self/?access_token=" + App_access_token
     print("Get request url : ",request_url)
-    user_info = requests.get(request_url).json()
+    try:
+        user_info = requests.get(request_url).json()
+    except requests.exceptions.ConnectionError:
+        cprint("Please check your internet connection",'red')
+        menu()
 
     if user_info['meta']['code'] == 200:
         if len(user_info['data']):
@@ -53,7 +57,11 @@ def self_info():
 def get_user_id(insta_username):
     request_url = Base_Url + 'users/search?q=' + insta_username + '&access_token=' + App_access_token
     print('GET request url : ',request_url)
-    user_info = requests.get(request_url).json()
+    try:
+        user_info = requests.get(request_url).json()
+    except requests.exceptions.ConnectionError:
+        cprint("Please check your internet connection",'red')
+        menu()
 
     if user_info['meta']['code'] == 200:
         if len(user_info['data']):
@@ -71,7 +79,11 @@ def get_user_info(insta_username):
         menu()
     request_url = Base_Url + 'users/' + user_id + '?access_token=' + App_access_token
     print('GET request url :',request_url)
-    user_info = requests.get(request_url).json()
+    try:
+        user_info = requests.get(request_url).json()
+    except requests.exceptions.ConnectionError:
+        cprint("Please check your internet connection",'red')
+        menu()
 
     if user_info['meta']['code'] == 200:
         if len(user_info['data']):
@@ -112,7 +124,11 @@ def get_user_info(insta_username):
 def get_own_post():
     request_url = Base_Url + 'users/self/media/recent/?access_token=' + App_access_token
     print('GET request url :',request_url)
-    own_media = requests.get(request_url).json()
+    try:
+        own_media = requests.get(request_url).json()
+    except requests.exceptions.ConnectionError:
+        cprint("Please check your internet connection",'red')
+        menu()
 
     if own_media['meta']['code'] == 200:
         if len(own_media['data']):
@@ -133,7 +149,11 @@ def get_user_post(insta_username):
         menu()
     request_url = Base_Url + 'users/' + user_id + '/media/recent/?access_token=' + App_access_token
     print('GET request url :',request_url)
-    user_media = requests.get(request_url).json()
+    try:
+        user_media = requests.get(request_url).json()
+    except requests.exceptions.ConnectionError:
+        cprint("Please check your internet connection",'red')
+        menu()
 
     if user_media['meta']['code'] == 200:
         if len(user_media['data']):
@@ -180,7 +200,11 @@ def get_post_id(insta_username):
         menu()
     request_url = Base_Url + 'users/' + user_id + '/media/recent/?access_token=' + App_access_token
     print('GET request url :', request_url)
-    user_media = requests.get(request_url).json()
+    try:
+        user_media = requests.get(request_url).json()
+    except requests.exceptions.ConnectionError:
+        cprint("Please check your internet connection",'red')
+        menu()
 
     if user_media['meta']['code'] == 200:
         if len(user_media['data']):
@@ -194,7 +218,11 @@ def peoples_like_recent_post(insta_username):
     post_id = get_post_id(insta_username)
     request_url = Base_Url + 'media/' + post_id + '/likes?access_token=' + App_access_token
     print('GET request url :', request_url)
-    peoples = requests.get(request_url).json()
+    try:
+        peoples = requests.get(request_url).json()
+    except requests.exceptions.ConnectionError:
+        cprint("Please check your internet connection",'red')
+        menu()
 
     if peoples['meta']['code'] == 200:
         if len(peoples['data']):
@@ -212,7 +240,11 @@ def peoples_like_recent_post(insta_username):
 def recent_media_liked_by_user():
     request_url = Base_Url + 'users/self/media/liked?access_token=' + App_access_token
     print('GET request url :', request_url)
-    media = requests.get(request_url).json()
+    try:
+        media = requests.get(request_url).json()
+    except requests.exceptions.ConnectionError:
+        cprint("Please check your internet connection",'red')
+        menu()
     if media['meta']['code'] == 200:
         if len(media['data']):
             image_name = media['data'][0]['id'] + '.jpeg'
@@ -234,14 +266,19 @@ def peoples_comment_recent_post(insta_username):
     post_id = get_post_id(insta_username)
     request_url = Base_Url + 'media/' + post_id + '/comments?access_token=' + App_access_token
     print('GET request url :', request_url)
-    peoples = requests.get(request_url).json()
+    try:
+        peoples = requests.get(request_url).json()
+    except requests.exceptions.ConnectionError:
+        cprint("Please check your internet connection",'red')
+        menu()
 
     if peoples['meta']['code'] == 200:
         if len(peoples['data']):
             position = 1
             cprint("Peoples comment recent post",'cyan')
             for users in peoples['data']:
-                print(position,colored(users['username'],'blue'))
+                print(position,colored(users['from']['username'],'blue'))
+                print(colored("This people say",'yellow'),colored(users['text'],'cyan'))
                 position += 1
         else:
             cprint("No one comment this post",'blue')
@@ -255,7 +292,11 @@ def list_of_users_this_user_follows(insta_username):
         menu()
     request_url = Base_Url + 'users/' + user_id + '/follows?access_token=' + App_access_token
     print('GET request url :', request_url)
-    peoples = requests.get(request_url).json()
+    try:
+        peoples = requests.get(request_url).json()
+    except requests.exceptions.ConnectionError:
+        cprint("Please check your internet connection",'red')
+        menu()
     if peoples['meta']['code'] == 200:
         if len(peoples['data']):
             position = 1
@@ -275,7 +316,11 @@ def list_of_users_this_user_is_followed_by(insta_username):
         menu()
     request_url = Base_Url + 'users/' + user_id + '/followed-by?access_token=' + App_access_token
     print('GET request url :', request_url)
-    peoples = requests.get(request_url).json()
+    try:
+        peoples = requests.get(request_url).json()
+    except requests.exceptions.ConnectionError:
+        cprint("Please check your internet connection",'red')
+        menu()
     if peoples['meta']['code'] == 200:
         if len(peoples['data']):
             position = 1
@@ -295,7 +340,11 @@ def like_a_post(insta_username):
     request_url = Base_Url + 'media/' + media_id + '/likes'
     payload = {"access_token": App_access_token}
     print('POST request url :',request_url)
-    like = requests.post(request_url, payload).json()
+    try:
+        like = requests.post(request_url, payload).json()
+    except requests.exceptions.ConnectionError:
+        cprint("Please check your internet connection",'red')
+        menu()
     if like['meta']['code'] == 200:
         cprint('Like successful!','green')
     else:
@@ -303,13 +352,15 @@ def like_a_post(insta_username):
 
 def post_a_comment(insta_username):
     media_id = get_post_id(insta_username)
-    text = raw_input(colored("Your comment: ",'cyan'))
+    text = input(colored("Your comment: ",'cyan'))
     payload = {"access_token": App_access_token, "text" : text}
     request_url = Base_Url + 'media/' + media_id + '/comments'
     print('POST request url :',request_url)
-
-    comment = requests.post(request_url, payload).json()
-
+    try:
+        comment = requests.post(request_url, payload).json()
+    except requests.exceptions.ConnectionError:
+        cprint("Please check your internet connection",'red')
+        menu()
     if comment['meta']['code'] == 200:
         cprint("Successfully added a new comment!",'green')
     else:
@@ -324,7 +375,11 @@ def get_post_by_caption(insta_username):
         menu()
     request_url = Base_Url + 'users/' + user_id + '/media/recent/?access_token=' + App_access_token
     print('GET request url :', request_url)
-    user_media = requests.get(request_url).json()
+    try:
+        user_media = requests.get(request_url).json()
+    except requests.exceptions.ConnectionError:
+        cprint("Please check your internet connection",'red')
+        menu()
     item = 1
     if user_media['meta']['code'] == 200:
         if len(user_media['data']):
