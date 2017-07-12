@@ -134,8 +134,13 @@ def get_own_post():
         if len(own_media['data']):
             image_name = own_media['data'][0]['id'] + '.jpeg'
             image_url = own_media['data'][0]['images']['standard_resolution']['url']
-            request.urlretrieve(image_url, image_name)
+            try:
+                request.urlretrieve(image_url, image_name)
+            except urllib.error.URLError:
+                cprint("Please check your internet connection",'red')
+                menu()
             cprint('Your image has been downloaded!','green')
+
         else:
             cprint("You doesn't have any post\n",'blue')
     else:
@@ -159,7 +164,11 @@ def get_user_post(insta_username):
         if len(user_media['data']):
             image_name = user_media['data'][0]['id'] + '.jpeg'
             image_url = user_media['data'][0]['images']['standard_resolution']['url']
-            request.urlretrieve(image_url,image_name)
+            try:
+                request.urlretrieve(image_url,image_name)
+            except urllib.error.URLError:
+                cprint("Please check your internet connection",'red')
+                menu()
             cprint("User's image has been downloaded!", 'green')
             print("")
             while(1):
@@ -249,7 +258,11 @@ def recent_media_liked_by_user():
         if len(media['data']):
             image_name = media['data'][0]['id'] + '.jpeg'
             image_url = media['data'][0]['images']['standard_resolution']['url']
-            request.urlretrieve(image_url, image_name)
+            try:
+                request.urlretrieve(image_url, image_name)
+            except urllib.error.URLError:
+                cprint("Please check your internet connection",'red')
+                menu()
             cprint("User's image has been downloaded!", 'green')
             print("Post owner is",colored(media['data'][0]['user']['username'],'blue'))
             print("")
@@ -278,7 +291,7 @@ def peoples_comment_recent_post(insta_username):
             cprint("Peoples comment recent post",'cyan')
             for users in peoples['data']:
                 print(position,colored(users['from']['username'],'blue'))
-                print(colored("This people say",'yellow'),colored(users['text'],'cyan'))
+                print(colored("This people say",'cyan'),colored(users['text'],'blue'))
                 position += 1
         else:
             cprint("No one comment this post",'blue')
@@ -387,7 +400,11 @@ def get_post_by_caption(insta_username):
                 if post['caption'] == caption:
                     image_name = str(item)+'.jpeg'
                     image_url = post['images']['standard_resolution']['url']
-                    request.urlretrieve(image_url, image_name)
+                    try:
+                        request.urlretrieve(image_url, image_name)
+                    except urllib.error.URLError:
+                        cprint("Please check your internet connection", 'red')
+                        menu()
                     print(item,'post founded and saved')
                     item += 1
                 else:
