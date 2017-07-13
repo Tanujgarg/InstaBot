@@ -1,10 +1,25 @@
+# This code is written by 'Tanuj Garg' <Tanujgarg@y7mail.com>
+# This code works with python 3.6 or higher version
+
 from admin_details import username,password
 import requests
 from termcolor import colored,cprint
 from urllib import request
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud, STOPWORDS
+import numpy as np
+from PIL import Image
+from os import path
+
 
 App_access_token = '5508711577.1063dec.210e3b7e96f14227b50f96e961f098d6'
 Base_Url = 'https://api.instagram.com/v1/'
+
+
+hash_tag = {
+    'media_id' : [],
+    'words':[]
+}
 
 
 def self_info():
@@ -380,7 +395,7 @@ def post_a_comment(insta_username):
         cprint("Unable to add comment. Try again!",'red')
 
 
-def get_post_by_caption(insta_username):
+def get_post_by_tag(insta_username):
     caption = input("Enter caption : ")
     user_id = get_user_id(insta_username)
     if user_id == None:
@@ -396,8 +411,10 @@ def get_post_by_caption(insta_username):
     item = 1
     if user_media['meta']['code'] == 200:
         if len(user_media['data']):
+            flag  = False
             for post in user_media['data']:
-                if post['caption'] == caption:
+                if post['tags'] == caption:
+                    flag = True
                     image_name = str(item)+'.jpeg'
                     image_url = post['images']['standard_resolution']['url']
                     try:
@@ -407,14 +424,63 @@ def get_post_by_caption(insta_username):
                         menu()
                     print(item,'post founded and saved')
                     item += 1
-                else:
-                    cprint("No post with this caption",'red')
+            if(not flag):
+                cprint("No post found with this caption",'red')
         else:
             cprint("User doesn't have any post\n", 'blue')
     else:
         print(colored('Status code other than 200 received!\n', 'red'))
 
+def hash_tag_trend(insta_username):
+    user_id = get_user_id(insta_username)
+    if user_id == None:
+        cprint("This user doesn't exist in your sandbox list", 'red')
+        menu()
+    request_url = Base_Url + 'users/' + user_id + '/media/recent/?access_token=' + App_access_token
+    print('GET request url :', request_url)
+    try:
+        user_media = requests.get(request_url).json()
+    except requests.exceptions.ConnectionError:
+        cprint("Please check your internet connection", 'red')
+        menu()
+    item = 1
+    flag = False
+    if user_media['meta']['code'] == 200:
+        if len(user_media['data']):
+            for post in user_media['data']:
+                if len(post['tags']):
+                    flag = True
+                    caption = post['caption']
+                    hash_tag['media_id'].append(post['id'])
+                    hash_tag['words'] = post['tags']
+            if (not flag):
+                cprint("No hashtags found",'red')
+            else:
+                wordcloud()
 
+        else:
+            cprint("User doesn't have any post\n", 'blue')
+    else:
+        print(colored('Status code other than 200 received!\n', 'red'))
+
+def wordcloud():
+    dir = path.dirname(__file__)
+    l = []
+    for index in hash_tag['words']:
+        l.append(str.join(' ', index))
+    words = str.join(' ',l)
+    mask = np.array(Image.open(path.join(dir, "twitter_mask.png")))
+    wordcloud = WordCloud(mask=mask,
+                          stopwords=STOPWORDS,
+                          background_color='white',
+                          width=1800,
+                          height=1400
+                          ).generate(words)
+    plt.imshow(wordcloud)
+    plt.axis('off')
+    plt.savefig('./wordcloud.png', dpi=300)
+    cprint("image saved with name wordcloud.png",'green')
+    plt.show()
 
 
 def Start_instaBot():
@@ -435,8 +501,9 @@ def menu():
         print("2.Get details of a user")
         print("3.Like a post(recently added)")
         print("4.Comment on a post(recently added)")
-        print("5.Get post by perticular caption")
-        print("6.Exit")
+        print("5.Get post by Hashtag")
+        print("6.Sub trend for an event and plot on wordcloud")
+        print("7.Exit")
         try:
             choice = int(input(colored("Your choice : ",'green')))
         except ValueError:
@@ -455,8 +522,11 @@ def menu():
             post_a_comment(insta_username)
         elif choice == 5:
             insta_username = input("Enter username : ")
-            get_post_by_caption(insta_username)
+            get_post_by_tag(insta_username)
         elif choice == 6:
+            insta_username = input("Enter username : ")
+            hash_tag_trend(insta_username)
+        elif choice == 7:
             exit()
         else:
             cprint("Invalid option",'red')
