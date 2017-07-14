@@ -8,5 +8,8 @@
 , requests library
 , Urllib library
 , termcolor library
-
-
+, PIL library
+, os library
+, wordcloud library
+, matplotlib library
+, numpy library
