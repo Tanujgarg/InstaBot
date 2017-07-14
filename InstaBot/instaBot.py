@@ -1,5 +1,6 @@
 # This code is written by 'Tanuj Garg' <Tanujgarg@y7mail.com>
 # This code works with python 3.6 or higher version
+# 'shreya1400', 'prernasobti' and 'cutiepie6029' are added in sandbox list
 
 from admin_details import username,password
 import requests
@@ -11,6 +12,7 @@ import numpy as np
 from PIL import Image
 from os import path
 
+# access token is generated from instagram developer
 
 App_access_token = '5508711577.1063dec.210e3b7e96f14227b50f96e961f098d6'
 Base_Url = 'https://api.instagram.com/v1/'
@@ -21,6 +23,7 @@ hash_tag = {
     'words':[]
 }
 
+# self_info() fetch the instagram account information of instabot admin
 
 def self_info():
     request_url = Base_Url + "users/self/?access_token=" + App_access_token
@@ -31,7 +34,7 @@ def self_info():
         cprint("Please check your internet connection",'red')
         menu()
 
-    if user_info['meta']['code'] == 200:
+    if user_info['meta']['code'] == 200:            # Status code verification
         if len(user_info['data']):
             print('Username : ',colored(user_info['data']['username'],'blue'))
             print("Name : ",colored(user_info['data']['full_name'],'blue'))
@@ -69,6 +72,10 @@ def self_info():
     else:
         print(colored('Status code other than 200 received!','red'))
 
+
+# getting user id by which information of the user access
+
+
 def get_user_id(insta_username):
     request_url = Base_Url + 'users/search?q=' + insta_username + '&access_token=' + App_access_token
     print('GET request url : ',request_url)
@@ -86,6 +93,10 @@ def get_user_id(insta_username):
     else:
         print(colored('Status code other than 200 received!', 'red'))
         menu()
+
+
+#user_info() fetch the the information of instagram users
+
 
 def get_user_info(insta_username):
     user_id = get_user_id(insta_username)
@@ -136,6 +147,10 @@ def get_user_info(insta_username):
     else:
         print(colored('Status code other than 200 received!', 'red'))
 
+
+#getting own recent post
+
+
 def get_own_post():
     request_url = Base_Url + 'users/self/media/recent/?access_token=' + App_access_token
     print('GET request url :',request_url)
@@ -160,6 +175,9 @@ def get_own_post():
             cprint("You doesn't have any post\n",'blue')
     else:
         print(colored('Status code other than 200 received!\n', 'red'))
+
+
+#getting user's recent post
 
 
 def get_user_post(insta_username):
@@ -217,6 +235,9 @@ def get_user_post(insta_username):
         print(colored('Status code other than 200 received!\n', 'red'))
 
 
+#Getiing  media id
+
+
 def get_post_id(insta_username):
     user_id = get_user_id(insta_username)
     if user_id == None:
@@ -237,6 +258,10 @@ def get_post_id(insta_username):
             cprint("User doesn't have any post\n", 'blue')
     else:
         print(colored('Status code other than 200 received!\n', 'red'))
+
+
+#list of peoples like recent post
+
 
 def peoples_like_recent_post(insta_username):
     post_id = get_post_id(insta_username)
@@ -259,6 +284,9 @@ def peoples_like_recent_post(insta_username):
             cprint("No one like this post",'blue')
     else:
         print(colored('Status code other than 200 received!\n', 'red'))
+
+
+# recent media liked by me
 
 
 def recent_media_liked_by_user():
@@ -287,7 +315,7 @@ def recent_media_liked_by_user():
         print(colored('Status code other than 200 received!\n', 'red'))
 
 
-
+#list of peoples comments recent post
 
 
 def peoples_comment_recent_post(insta_username):
@@ -313,6 +341,10 @@ def peoples_comment_recent_post(insta_username):
     else:
         print(colored('Status code other than 200 received!\n', 'red'))
 
+
+#list of peoples follows
+
+
 def list_of_users_this_user_follows(insta_username):
     user_id = get_user_id(insta_username)
     if user_id == None:
@@ -336,6 +368,10 @@ def list_of_users_this_user_follows(insta_username):
             cprint("No one this user follows",'blue')
     else:
         print(colored('Status code other than 200 received!\n', 'red'))
+
+
+#list of peoples following
+
 
 def list_of_users_this_user_is_followed_by(insta_username):
     user_id = get_user_id(insta_username)
@@ -362,6 +398,8 @@ def list_of_users_this_user_is_followed_by(insta_username):
         print(colored('Status code other than 200 received!\n', 'red'))
 
 
+#like recent post of user
+
 
 def like_a_post(insta_username):
     media_id = get_post_id(insta_username)
@@ -378,6 +416,10 @@ def like_a_post(insta_username):
     else:
         cprint('Your like was unsuccessful. Try again!','red')
 
+
+#comment on recent post of a user
+
+
 def post_a_comment(insta_username):
     media_id = get_post_id(insta_username)
     text = input(colored("Your comment: ",'cyan'))
@@ -393,6 +435,10 @@ def post_a_comment(insta_username):
         cprint("Successfully added a new comment!",'green')
     else:
         cprint("Unable to add comment. Try again!",'red')
+
+
+
+# search a post by a tag(Hash)
 
 
 def get_post_by_tag(insta_username):
@@ -413,23 +459,28 @@ def get_post_by_tag(insta_username):
         if len(user_media['data']):
             flag  = False
             for post in user_media['data']:
-                if post['tags'] == caption:
-                    flag = True
-                    image_name = str(item)+'.jpeg'
-                    image_url = post['images']['standard_resolution']['url']
-                    try:
-                        request.urlretrieve(image_url, image_name)
-                    except urllib.error.URLError:
-                        cprint("Please check your internet connection", 'red')
-                        menu()
-                    print(item,'post founded and saved')
-                    item += 1
+                for i in post['tags']:
+                    if i == caption:
+                        flag = True
+                        image_name = str(item)+'.jpeg'
+                        image_url = post['images']['standard_resolution']['url']
+                        try:
+                            request.urlretrieve(image_url, image_name)
+                        except urllib.error.URLError:
+                            cprint("Please check your internet connection", 'red')
+                            menu()
+                        print(item,'post founded and saved')
+                        item += 1
             if(not flag):
                 cprint("No post found with this caption",'red')
         else:
             cprint("User doesn't have any post\n", 'blue')
     else:
         print(colored('Status code other than 200 received!\n', 'red'))
+
+
+#finding subtrend event using hashtags
+
 
 def hash_tag_trend(insta_username):
     user_id = get_user_id(insta_username)
@@ -450,9 +501,9 @@ def hash_tag_trend(insta_username):
             for post in user_media['data']:
                 if len(post['tags']):
                     flag = True
-                    caption = post['caption']
+                    #caption = post['caption']
                     hash_tag['media_id'].append(post['id'])
-                    hash_tag['words'] = post['tags']
+                    hash_tag['words'].append(post['tags'])
             if (not flag):
                 cprint("No hashtags found",'red')
             else:
@@ -463,25 +514,36 @@ def hash_tag_trend(insta_username):
     else:
         print(colored('Status code other than 200 received!\n', 'red'))
 
+
+#plotting words on wordcloud
+
+
 def wordcloud():
     dir = path.dirname(__file__)
     l = []
+    print(hash_tag['words'])
     for index in hash_tag['words']:
         l.append(str.join(' ', index))
     words = str.join(' ',l)
+    print(words)
     mask = np.array(Image.open(path.join(dir, "twitter_mask.png")))
-    wordcloud = WordCloud(mask=mask,
+    try:
+        wordcloud = WordCloud(mask=mask,
                           stopwords=STOPWORDS,
                           background_color='white',
                           width=1800,
                           height=1400
                           ).generate(words)
+    except ValueError:
+        cprint('This user has invalid tags','red')
+        menu()
     plt.imshow(wordcloud)
     plt.axis('off')
     plt.savefig('./wordcloud.png', dpi=300)
     cprint("image saved with name wordcloud.png",'green')
     plt.show()
 
+# main function
 
 def Start_instaBot():
     user = input("Enter Username : ")
@@ -493,6 +555,8 @@ def Start_instaBot():
     else:
         print(colored("Verification failed !\nPlease provide right Details\n",'red'))
         Start_instaBot()
+
+# menu bar
 
 def menu():
     while(1):
