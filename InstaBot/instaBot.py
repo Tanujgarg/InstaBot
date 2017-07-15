@@ -1,6 +1,7 @@
 # This code is written by 'Tanuj Garg' <Tanujgarg@y7mail.com>
 # This code works with python 3.6 or higher version
 # 'shreya1400', 'prernasobti' and 'cutiepie6029' are added in sandbox list
+# token owner is as 'mohit_s_jindal'
 
 from admin_details import username,password
 import requests
@@ -519,13 +520,11 @@ def hash_tag_trend(insta_username):
 
 
 def wordcloud():
-    dir = path.dirname(__file__)
+    dir = path.dirname(__file__)   # current directory
     l = []
-    print(hash_tag['words'])
     for index in hash_tag['words']:
         l.append(str.join(' ', index))
     words = str.join(' ',l)
-    print(words)
     mask = np.array(Image.open(path.join(dir, "twitter_mask.png")))
     try:
         wordcloud = WordCloud(mask=mask,
@@ -546,8 +545,8 @@ def wordcloud():
 # main function
 
 def Start_instaBot():
-    user = input("Enter Username : ")
-    pswrd = input("Enter Password : ")
+    user = input("Enter Username : ")                 # Tanujgarg
+    pswrd = input("Enter Password : ")                # 1234567890
     if user.upper() == username and pswrd == password:
         print(colored("Login Successful",'cyan'))
         print(colored("-----Wellcome to InstaBot-----\n",'blue'))
