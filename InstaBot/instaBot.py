@@ -443,7 +443,7 @@ def post_a_comment(insta_username):
 
 
 def get_post_by_tag(insta_username):
-    caption = input("Enter caption : ")
+    caption = input("Enter tag : ")
     user_id = get_user_id(insta_username)
     if user_id == None:
         cprint("This user doesn't exist in your sandbox list", 'red')
@@ -470,7 +470,7 @@ def get_post_by_tag(insta_username):
                         except urllib.error.URLError:
                             cprint("Please check your internet connection", 'red')
                             menu()
-                        print(item,'post founded and saved')
+                        print(item,colored('post founded and saved','cyan'))
                         item += 1
             if(not flag):
                 cprint("No post found with this caption",'red')
